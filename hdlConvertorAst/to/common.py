@@ -92,10 +92,10 @@ class ToHdlCommon(HdlAstVisitor):
         :type op: HdlOp
         """
         o = op.fn
-        w = self.out.write
         argc = len(op.ops)
         if argc == 1:
             op_str = self.GENERIC_UNARY_OPS.get(o, None)
+            w = self.out.write
             if op_str is not None:
                 w(op_str)
                 self._visit_operand(op.ops[0], 0, op, False, False)
@@ -106,13 +106,13 @@ class ToHdlCommon(HdlAstVisitor):
                 w(op_str)
                 return
 
-        if argc == 2:
+        elif argc == 2:
             op_str = self.GENERIC_BIN_OPS.get(o, None)
             if op_str is not None:
                 return self._visit_bin_op(op, op_str)
         if o == HdlOpType.INDEX:
             return self._visit_operator_index(op)
-        elif o == HdlOpType.CALL or o == HdlOpType.PARAMETRIZATION:
+        elif o in [HdlOpType.CALL, HdlOpType.PARAMETRIZATION]:
             return self.visit_operator_call(op)
         else:
             raise NotImplementedError(
@@ -146,9 +146,7 @@ class ToHdlCommon(HdlAstVisitor):
             op_my, precedence_my, asoc_my,
             op_parent, precedence_parent, asoc_parent,
             left, right):
-        if op_my in self.ALL_UNARY_OPS and op_parent in self.ALL_UNARY_OPS:
-            return True
-        return False
+        return op_my in self.ALL_UNARY_OPS and op_parent in self.ALL_UNARY_OPS
 
     def _visit_operand(self, operand, i,
                        parent,
@@ -181,13 +179,12 @@ class ToHdlCommon(HdlAstVisitor):
                         else:
                             assert asoc_parent == ASSOCIATIVITY.R_TO_L, asoc_parent
                             right = parent.ops[0]
+                    elif i == 0:
+                        right = parent.ops[1]
                     else:
-                        if i == 0:
-                            right = parent.ops[1]
-                        else:
-                            left = parent.ops[i - 1]
-                            if argc > i + 2:
-                                right = parent.ops[i + 1]
+                        left = parent.ops[i - 1]
+                        if argc > i + 2:
+                            right = parent.ops[i + 1]
 
                     if self._visit_operand_parentheses_extra_check(
                             op_my, precedence_my, asoc_my, parent.fn,

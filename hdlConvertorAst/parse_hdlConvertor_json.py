@@ -9,27 +9,36 @@ from hdlConvertorAst.py_ver_compatibility import is_str
 
 KNOWN_NODES = {
     cls_name: getattr(hdlAst, cls_name)
-    for cls_name in dir(hdlAst) if cls_name.startswith("Hdl")
-}
-KNOWN_NODES.update({
+    for cls_name in dir(hdlAst)
+    if cls_name.startswith("Hdl")
+} | {
     "dict": dict,
     "list": list,
     "tuple": tuple,
     "str": str,
-})
+}
 
 
 def _parse_hdlConvertor_json(j):
     # handle primitive types
-    if j is None:
+    if j is None or isinstance(j, float):
         return j
-    elif isinstance(j, float):
-        return j
-    elif is_str(j):
+    elif j is not None and not isinstance(j, float) and is_str(j):
         return HdlValueId(j)
-    elif isinstance(j, int):
+    elif (
+        j is not None
+        and not isinstance(j, float)
+        and not is_str(j)
+        and isinstance(j, int)
+    ):
         return HdlValueInt(j, None, None)
-    elif isinstance(j, list):
+    elif (
+        j is not None
+        and not isinstance(j, float)
+        and not is_str(j)
+        and not isinstance(j, int)
+        and isinstance(j, list)
+    ):
         return [_parse_hdlConvertor_json(_j) for _j in j]
 
     # load a hdlAst object
@@ -44,7 +53,7 @@ def _parse_hdlConvertor_json(j):
         _items = j["items"]
         items = [_parse_hdlConvertor_json(i) for i in _items]
         if cls is dict:
-            return {k: v for k, v in items}
+            return dict(items)
         elif cls is tuple:
             return tuple(items)
         else:
@@ -66,16 +75,12 @@ def _parse_hdlConvertor_json(j):
         arg_names = cls.__init__.__code__.co_varnames[1:argc]
         for a in arg_names:
             v = j.get(a, None)
-            if a == "fn":
-                v = getattr(HdlOpType, v)
-            else:
-                v = _parse_hdlConvertor_json(v)
+            v = getattr(HdlOpType, v) if a == "fn" else _parse_hdlConvertor_json(v)
             argv.append(v)
             consumed.add(a)
         o = cls(*argv)
 
-    not_consumed = set(j.keys()).difference(consumed)
-    if not_consumed:
+    if not_consumed := set(j.keys()).difference(consumed):
         # load rest of the properties which were not in __init__ params
         for k in not_consumed:
             v = j[k]
@@ -90,10 +95,7 @@ def _parse_hdlConvertor_json(j):
                     _v.stop_column
                 ) = v
             elif k == "direction":
-                if v is None:
-                    _v = v
-                else:
-                    _v = getattr(HdlDirection, v)
+                _v = v if v is None else getattr(HdlDirection, v)
             elif k == "join_t":
                 _v = getattr(HdlStmBlockJoinType, v)
             elif k == "trigger_constrain":

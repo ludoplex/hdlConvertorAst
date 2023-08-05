@@ -14,9 +14,7 @@ def collect_hdl_ids(expr, res):
             collect_hdl_ids(o, res)
     elif isinstance(expr, HdlValueId):
         res.add(expr)
-    elif isinstance(expr, (HdlValueInt, bool, int, str, float)):
-        pass
-    else:
+    elif not isinstance(expr, (HdlValueInt, bool, int, str, float)):
         raise NotImplementedError(expr)
 
 
@@ -28,8 +26,7 @@ def collect_indexes(expr):
     """
     if isinstance(expr, HdlOp) and expr.fn == HdlOpType.INDEX:
         assert len(expr.ops) == 2, expr.ops
-        for i in collect_indexes(expr.ops[0]):
-            yield i
+        yield from collect_indexes(expr.ops[0])
         yield expr.ops[1]
 
 

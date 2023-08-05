@@ -144,15 +144,13 @@ class ToVerilog2005(ToVerilog2005Stm):
         w = self.out.write
         assert c.module_name
         self.visit_iHdlExpr(c.module_name)
-        gms = c.param_map
-        if gms:
+        if gms := c.param_map:
             w(" #(\n")
             self.visit_map(gms)
             w(")")
         w(" ")
         w(c.name.val)
-        pms = c.port_map
-        if pms:
+        if pms := c.port_map:
             w(" (\n")
             self.visit_map(pms)
             w(")")
@@ -208,8 +206,7 @@ class ToVerilog2005(ToVerilog2005Stm):
                     self.visit_HdlIdDef(s)
                     w(";\n")
                 elif isinstance(s, iHdlStatement):
-                    need_semi = self.visit_iHdlStatement(s)
-                    if need_semi:
+                    if need_semi := self.visit_iHdlStatement(s):
                         w(";\n")
                     else:
                         w("\n")
@@ -244,8 +241,7 @@ class ToVerilog2005(ToVerilog2005Stm):
         w = self.out.write
         w("module ")
         w(mod_dec.name)
-        gs = mod_dec.params
-        if gs:
+        if gs := mod_dec.params:
             w(" #(\n")
             with Indent(self.out):
                 for last, g in iter_with_last(gs):
@@ -256,8 +252,7 @@ class ToVerilog2005(ToVerilog2005Stm):
                         w(",\n")
 
             w(")")
-        ps = mod_dec.ports
-        if ps:
+        if ps := mod_dec.ports:
             w(" (\n")
             with Indent(self.out):
                 for last, p in iter_with_last(ps):
@@ -279,8 +274,7 @@ class ToVerilog2005(ToVerilog2005Stm):
                     self.visit_HdlCompInst(o)
                     w(";\n\n")
                 elif isinstance(o, iHdlStatement):
-                    need_semi = self.visit_iHdlStatement(o)
-                    if need_semi:
+                    if need_semi := self.visit_iHdlStatement(o):
                         w(";\n")
                     else:
                         w("\n\n")

@@ -137,7 +137,5 @@ class ResolveNames(HdlAstVisitor):
         elif isinstance(o, (list, tuple)):
             for o2 in o:
                 self.visit_iHdlExpr(o2)
-        elif o is HdlTypeAuto:
-            pass
-        else:
+        elif o is not HdlTypeAuto:
             raise NotImplementedError(o)

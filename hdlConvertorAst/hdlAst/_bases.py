@@ -28,7 +28,7 @@ class iHdlObj(object):
         from hdlConvertorAst.to.json_debug import ToJsonDebug
         from pprint import pprint
         to = ToJsonDebug()
-        d = getattr(to, "visit_" + self.__class__.__name__)(self)
+        d = getattr(to, f"visit_{self.__class__.__name__}")(self)
         s = StringIO()
         pprint(d, stream=s, depth=None)
         return s.getvalue()

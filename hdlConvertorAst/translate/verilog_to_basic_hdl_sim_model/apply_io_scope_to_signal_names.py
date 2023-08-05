@@ -61,9 +61,7 @@ class ApplyIoScopeToSignalNames(HdlAstVisitor):
         """
         if isinstance(o, HdlValueId):
             o = add_io_prefix(o)
-            if not self._stm_dst:
-                return hdl_getattr(o, "val")
-            return o
+            return hdl_getattr(o, "val") if not self._stm_dst else o
         elif o is None or isinstance(o, HdlValueInt) or is_str(o):
             return o
         elif isinstance(o, list):
@@ -71,8 +69,7 @@ class ApplyIoScopeToSignalNames(HdlAstVisitor):
         elif isinstance(o, HdlOp):
             return self.visit_HdlOp(o)
         else:
-            raise NotImplementedError(
-                "Do not know how to convert %s" % (o))
+            raise NotImplementedError(f"Do not know how to convert {o}")
 
     def visit_HdlStmAssign(self, o):
         """

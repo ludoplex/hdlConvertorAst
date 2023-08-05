@@ -138,9 +138,9 @@ class ToVhdl2008Expr(ToHdlCommon):
         if is_str(v):
             v = v.upper()
             if o.base == 256:
-                w("'%s'" % v)
+                w(f"'{v}'")
             else:
-                w('%s"%s"' % (self.NUM_BASES[o.base], v))
+                w(f'{self.NUM_BASES[o.base]}"{v}"')
             return
 
         if bits is None:
@@ -211,7 +211,7 @@ class ToVhdl2008Expr(ToHdlCommon):
             w("FALLING_EDGE(")
             self.visit_iHdlExpr(o.ops[0])
             w(")")
-        elif op == HdlOpType.INDEX or op == HdlOpType.CALL:
+        elif op in [HdlOpType.INDEX, HdlOpType.CALL]:
             self._visit_operand(o.ops[0], 0, o, False, False)
             w("(")
             for isLast, (o_i, _o) in iter_with_last(enumerate(o.ops[1:])):
@@ -240,10 +240,7 @@ class ToVhdl2008Expr(ToHdlCommon):
             self._visit_operand(o.ops[0], 0, o, True, False)
             w("'")
             args = o.ops[1]
-            if isinstance(args, list):
-                self.visit_iHdlExpr(args)
-            elif isinstance(args, HdlValueId):
-                # normal attribute
+            if isinstance(args, (list, HdlValueId)):
                 self.visit_iHdlExpr(args)
             else:
                 w("(")

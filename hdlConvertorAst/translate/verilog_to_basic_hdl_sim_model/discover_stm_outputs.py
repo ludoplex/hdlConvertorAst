@@ -15,25 +15,20 @@ def get_output_ids(e, outputs):
     if isinstance(e, tuple):
         for o in e:
             get_output_ids(o, outputs)
-        return  
+        return
     cur_path = []
     while isinstance(e, HdlOp):
-        if not e.fn == HdlOpType.DOT:
+        if e.fn != HdlOpType.DOT:
             raise NotImplementedError(e)
         op0, op1 = e.ops
         assert isinstance(op1, HdlValueId), op1
         cur_path.append(op1)
         e = op0
-    if isinstance(e, HdlValueId):
-        cur_path.append(e)
-        if len(cur_path) == 1:
-            cur_path = cur_path[0]
-        else:
-            cur_path = tuple(reversed(cur_path))
-
-        outputs.add(cur_path)
-    else:
+    if not isinstance(e, HdlValueId):
         raise NotImplementedError(e)
+    cur_path.append(e)
+    cur_path = cur_path[0] if len(cur_path) == 1 else tuple(reversed(cur_path))
+    outputs.add(cur_path)
 
 
 def discover_outputs(stm, outputs):
@@ -102,5 +97,5 @@ def discover_stm_outputs_context(c):
             for o1 in o0.objs:
                 if isinstance(o1, HdlStmProcess):
                     _outputs = discover_stm_outputs(o1)
-                    outputs.update(_outputs)
+                    outputs |= _outputs
     return outputs

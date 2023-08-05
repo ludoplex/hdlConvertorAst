@@ -36,10 +36,7 @@ def is_not_const(e, names_of_constants):
     if e is None:
         return False
     elif isinstance(e, HdlOp):
-        for o in e.ops:
-            if is_not_const(o, names_of_constants):
-                return True
-        return False
+        return any(is_not_const(o, names_of_constants) for o in e.ops)
     elif isinstance(e, HdlValueId):
         return e.val not in names_of_constants
     return False
@@ -65,24 +62,23 @@ class ToHwt(ToHwtStm):
         self._is_param = False
 
     def visit_doc(self, obj, doc_string=False):
-        if doc_string:
-            doc = obj.doc
-            if doc is not None:
-                doc = doc.split("\n")
-                w = self.out.write
-                if len(doc) > 1:
-                    w('"""')
-                    for d in doc:
-                        w(d.replace('\r', ''))
-                        w("\n")
-                    w('"""\n')
-                else:
-                    w('"')
-                    if doc:
-                        w(doc[0].replace('\r', ''))
-                    w('"\n')
-        else:
+        if not doc_string:
             return super(ToHwt, self).visit_doc(obj, "#")
+        doc = obj.doc
+        if doc is not None:
+            doc = doc.split("\n")
+            w = self.out.write
+            if len(doc) > 1:
+                w('"""')
+                for d in doc:
+                    w(d.replace('\r', ''))
+                    w("\n")
+                w('"""\n')
+            else:
+                w('"')
+                if doc:
+                    w(doc[0].replace('\r', ''))
+                w('"\n')
 
     def add_module_exampe_serialization(self, module_name):
         w = self.out.write
@@ -95,27 +91,28 @@ class ToHwt(ToHwtStm):
             w("print(to_rtl_str(u))\n")
 
     def ivars_to_local_vars(self, var_names):
-        if var_names:
-            w = self.out.write
-            VAR_PER_LINE_LIMIT = self.VAR_PER_LINE_LIMIT
-            # ports and params to locals
-            for i, (last, name) in enumerate(iter_with_last(var_names)):
-                w(name)
-                if not last:
-                    w(", ")
-                if i % VAR_PER_LINE_LIMIT == 0 and i > 0:
+        if not var_names:
+            return
+        w = self.out.write
+        VAR_PER_LINE_LIMIT = self.VAR_PER_LINE_LIMIT
+        # ports and params to locals
+        for i, (last, name) in enumerate(iter_with_last(var_names)):
+            w(name)
+            if not last:
+                w(", ")
+            if i % VAR_PER_LINE_LIMIT == 0 and i > 0:
+                # jump to new line to have reasonably long variable list
+                w("\\\n")
+        w(" = \\\n")
+        for i, (last, name) in enumerate(iter_with_last(var_names)):
+            w("self.")
+            w(name)
+            if not last:
+                w(", ")
+            if i % VAR_PER_LINE_LIMIT == 0 and i > 0:
                     # jump to new line to have reasonably long variable list
                     w("\\\n")
-            w(" = \\\n")
-            for i, (last, name) in enumerate(iter_with_last(var_names)):
-                w("self.")
-                w(name)
-                if not last:
-                    w(", ")
-                if i % VAR_PER_LINE_LIMIT == 0 and i > 0:
-                        # jump to new line to have reasonably long variable list
-                        w("\\\n")
-            w("\n")
+        w("\n")
 
     def visit_HdlModuleDef(self, mod_def):
         """
@@ -133,7 +130,7 @@ class ToHwt(ToHwtStm):
 
         split_HdlModuleDefObjs = method_as_function(ToBasicHdlSimModel.split_HdlModuleDefObjs)
         otherDefs, variables, processes, components, others = \
-            split_HdlModuleDefObjs(self, mod_def.objs)
+                split_HdlModuleDefObjs(self, mod_def.objs)
 
         method_as_function(ToBasicHdlSimModel.visit_component_imports)(self, components)
 
@@ -235,15 +232,13 @@ class ToHwt(ToHwtStm):
                             self.visit_iHdlExpr(mod_port)
                             w("(")
                             self.visit_iHdlExpr(connected_sig)
-                            w(")\n")
                         else:
                             self.visit_iHdlExpr(connected_sig)
                             w("(")
                             w(c.name.val)
                             w(".")
                             self.visit_iHdlExpr(mod_port)
-                            w(")\n")
-
+                        w(")\n")
                 for p in processes:
                     self.visit_iHdlStatement(p)
                     # extra line to separate a process functions
@@ -312,27 +307,23 @@ class ToHwt(ToHwtStm):
                 w(".from_py(")
                 self.visit_iHdlExpr(var.value)
                 w(")\n")
+        elif var.value is not None and var.value != HdlValueId("None") and is_not_const(var.value, names_of_constants):
+            w(' = rename_signal(self, ')
+            self.visit_iHdlExpr(var.value)
+            w(', "')
+            w(var.name)
+            w('")\n')
         else:
-            # body signal
-            if var.value is not None and var.value != HdlValueId("None") and is_not_const(var.value, names_of_constants):
-                w(' = rename_signal(self, ')
-                self.visit_iHdlExpr(var.value)
-                w(', "')
+            w(' = self._sig(')
+            with Indent(self.out):
+                w('"')
                 w(var.name)
-                w('")\n')
-            else:
-                w(' = self._sig(')
-                with Indent(self.out):
+                if var.type == HdlValueId("BIT"):
                     w('"')
-                    w(var.name)
-                    if var.type == HdlValueId("BIT"):
-                        w('"')
-                    else:
-                        w('", ')
-                        self.visit_type(var.type)
-                if var.value is None:
-                    w(")\n")
                 else:
-                    w(", def_val=")
-                    self.visit_iHdlExpr(var.value)
-                    w(")\n")
+                    w('", ')
+                    self.visit_type(var.type)
+            if var.value is not None:
+                w(", def_val=")
+                self.visit_iHdlExpr(var.value)
+            w(")\n")

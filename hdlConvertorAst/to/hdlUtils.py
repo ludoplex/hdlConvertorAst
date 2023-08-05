@@ -36,7 +36,7 @@ class UnIndent():
         self.original_indent = s.indent_str
         assert s.indent_cnt > 0
         s.indent_cnt -= 1
-        s.indent_str = s.indent_str[0:len(s.indent_str) - len(s.INDENT_STEP)]
+        s.indent_str = s.indent_str[:len(s.indent_str) - len(s.INDENT_STEP)]
 
     def __exit__(self, exception_type, exception_value, traceback):
         s = self.s
@@ -99,18 +99,10 @@ def bit_string(v, width, vld_mask=None):
     if vld_mask is None:
         vld_mask = all_mask
 
-    # if vld_mask == 0:
-    #     if width % 4 == 0:
-    #         base = 16
-    #         bit_string = "".join(["x" for _ in range(width//4)])
-    #     else:
-    #         base = 2
-    #         bit_string = "".join(["x" for _ in range(width)])
-
     elif width % 4 == 0 and vld_mask == (1 << width) - 1:
         # hex full valid
         base = 16
-        bit_string = ("%0" + str(width // 4) + 'x') % (v)
+        bit_string = f"%0{str(width // 4)}x" % v
     else:
         # binary
         base = 2

@@ -11,6 +11,4 @@ else:
 
 
 def method_as_function(fn):
-    if sys.version_info[0] <= 2:
-        return fn.im_func
-    return fn
+    return fn.im_func if sys.version_info[0] <= 2 else fn

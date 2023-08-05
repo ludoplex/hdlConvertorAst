@@ -31,8 +31,7 @@ class ToSystemcStm(ToSystemcExpr):
         w("\n")
         with Indent(self.out):
             for s in o.body:
-                need_semi = self.visit_iHdlStatement(s)
-                if need_semi:
+                if need_semi := self.visit_iHdlStatement(s):
                     w(";\n")
                 else:
                     w("\n")
@@ -59,8 +58,7 @@ class ToSystemcStm(ToSystemcExpr):
         else:
             w("() {\n")
             with Indent(self.out):
-                req_semi = self.visit_iHdlStatement(o.body)
-                if req_semi:
+                if req_semi := self.visit_iHdlStatement(o.body):
                     w(";\n")
                 else:
                     w("\n")
@@ -99,8 +97,7 @@ class ToSystemcStm(ToSystemcExpr):
             self.visit_iHdlExpr(k)
             w(":")
             with Indent(self.out):
-                need_semi = self.visit_iHdlStatement_in_statement(stms)
-                if need_semi:
+                if need_semi := self.visit_iHdlStatement_in_statement(stms):
                     w(";\n")
                 else:
                     w("\n")
@@ -108,8 +105,7 @@ class ToSystemcStm(ToSystemcExpr):
         if defal is not None:
             w("default:")
             with Indent(self.out):
-                need_semi = self.visit_iHdlStatement_in_statement(defal)
-                if need_semi:
+                if need_semi := self.visit_iHdlStatement_in_statement(defal):
                     w(";\n")
                 else:
                     w("\n")

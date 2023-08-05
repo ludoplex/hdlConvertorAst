@@ -65,10 +65,7 @@ class HdlAstModifier(HdlAstVisitor):
         :type o: iHdlExpr
         :return: iHdlExpr
         """
-        if isinstance(o, HdlOp):
-            return self.visit_HdlOp(o)
-        else:
-            return o
+        return self.visit_HdlOp(o) if isinstance(o, HdlOp) else o
 
     def visit_HdlOp(self, o):
         """

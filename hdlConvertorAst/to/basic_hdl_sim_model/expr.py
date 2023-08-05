@@ -97,41 +97,37 @@ class ToBasicHdlSimModelExpr(ToHdlCommon):
         :type o: HdlValueInt
         """
         w = self.out.write
-        if o.bits is None:
+        if o.bits is not None and o.base is None or o.bits is None:
             w(str(o.val))
         else:
-            if o.base is None:
-                w(str(o.val))
-            else:
-                b = o.base
-                v = o.val
-                if is_str(v):
-                    if set(v) == set('x'):
-                        v = None
-                        f = "{0}"
-                    elif b == 2:
-                        f = "0b{0}"
-                    elif b == 8:
-                        f = "0o{0}"
-                    elif b == 10:
-                        f = "{0}"
-                    elif b == 16:
-                        f = "0x{0}"
-                    else:
-                        raise NotImplementedError(b)
+            b = o.base
+            v = o.val
+            if is_str(v):
+                if set(v) == set('x'):
+                    v = None
+                    f = "{0}"
+                elif b == 2:
+                    f = "0b{0}"
+                elif b == 8:
+                    f = "0o{0}"
+                elif b == 10:
+                    f = "{0}"
+                elif b == 16:
+                    f = "0x{0}"
                 else:
-                    if b == 2:
-                        f = "0b{0:b}"
-                    elif b == 8:
-                        f = "0o{0:o}"
-                    elif b == 10:
-                        f = "{0:d}"
-                    elif b == 16:
-                        f = "0x{0:x}"
-                    else:
-                        raise NotImplementedError(b)
-                v = f.format(v)
-                w(v)
+                    raise NotImplementedError(b)
+            elif b == 2:
+                f = "0b{0:b}"
+            elif b == 8:
+                f = "0o{0:o}"
+            elif b == 10:
+                f = "{0:d}"
+            elif b == 16:
+                f = "0x{0:x}"
+            else:
+                raise NotImplementedError(b)
+            v = f.format(v)
+            w(v)
 
     def visit_iHdlExpr(self, o):
         """
@@ -142,7 +138,7 @@ class ToBasicHdlSimModelExpr(ToHdlCommon):
             w(o.val)
             return
         elif is_str(o):
-            w('"%s"' % o)
+            w(f'"{o}"')
             return
         elif isinstance(o, HdlValueInt):
             self.visit_HdlValueInt(o)

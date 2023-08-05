@@ -17,20 +17,29 @@ class HdlAstVisitor(object):
 
     def __init__(self):
         self._visit_call_dispatch_dict = {
-            cls: getattr(self, "visit_" + cls.__name__)
+            cls: getattr(self, f"visit_{cls.__name__}")
             for cls in [
-                HdlContext, HdlImport, HdlLibrary, HdlModuleDec, HdlModuleDef,
-                HdlValueIdspace, HdlIdDef, HdlFunctionDef,
-                HdlClassDef, HdlPhysicalDef, HdlEnumDef,
-                HdlCompInst, HdlOp, HdlValueInt] + list(ALL_STATEMENT_CLASSES)
+                HdlContext,
+                HdlImport,
+                HdlLibrary,
+                HdlModuleDec,
+                HdlModuleDef,
+                HdlValueIdspace,
+                HdlIdDef,
+                HdlFunctionDef,
+                HdlClassDef,
+                HdlPhysicalDef,
+                HdlEnumDef,
+                HdlCompInst,
+                HdlOp,
+                HdlValueInt,
+            ]
+            + list(ALL_STATEMENT_CLASSES)
         }
 
     def visit_iHdlObj(self, o):
         visit_fn = self._visit_call_dispatch_dict.get(o.__class__, None)
-        if visit_fn is not None:
-            return visit_fn(o)
-        else:
-            return self.visit_iHdlExpr(o)
+        return visit_fn(o) if visit_fn is not None else self.visit_iHdlExpr(o)
 
     def visit_doc(self, o):
         pass
@@ -67,10 +76,7 @@ class HdlAstVisitor(object):
 
     def visit_main_obj(self, o):
         visit_fn = self._visit_call_dispatch_dict.get(o.__class__, None)
-        if visit_fn is not None:
-            return visit_fn(o)
-        else:
-            return self.visit_iHdlExpr(o)
+        return visit_fn(o) if visit_fn is not None else self.visit_iHdlExpr(o)
 
     def visit_iHdlStatement(self, o):
         """
@@ -113,9 +119,7 @@ class HdlAstVisitor(object):
         :type o: iHdlExpr
         :return: iHdlExpr
         """
-        if isinstance(o, HdlOp):
-            return self.visit_HdlOp(o)
-        return o
+        return self.visit_HdlOp(o) if isinstance(o, HdlOp) else o
 
     def visit_HdlOp(self, o):
         """

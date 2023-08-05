@@ -79,11 +79,10 @@ class ToBasicHdlSimModel(ToBasicHdlSimModelStm):
         for o in objs:
             if o.__class__ is HdlIdDef and o.type == HdlTypeType:
                 definitions.append(o)
+            elif isinstance(o, iHdlStatement) and o.in_preproc:
+                others.append(o)
             else:
-                if isinstance(o, iHdlStatement) and o.in_preproc:
-                    others.append(o)
-                else:
-                    obj_type_containers[o.__class__].append(o)
+                obj_type_containers[o.__class__].append(o)
 
         return definitions, variables, processes, components, others
 
@@ -238,7 +237,7 @@ class ToBasicHdlSimModel(ToBasicHdlSimModelStm):
             w('", [')
             for last, (k, v) in iter_with_last(val.values):
                 assert v is None, v
-                w('"%s"' % k)
+                w(f'"{k}"')
                 if not last:
                     w(", ")
             w("])()\n")

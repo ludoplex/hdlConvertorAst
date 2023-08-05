@@ -71,10 +71,7 @@ class ToJson(HdlAstVisitor):
         """
         :type o: HdlDirection
         """
-        if o is None or o == HdlDirection.UNKNOWN:
-            return None
-        else:
-            return o.name
+        return None if o is None or o == HdlDirection.UNKNOWN else o.name
 
     def visit_HdlIdDef(self, o):
         """
@@ -336,8 +333,7 @@ class ToJson(HdlAstVisitor):
         """
         :type o: HdlStmNop
         """
-        d = self._visit_iHdlStatement(o)
-        return d
+        return self._visit_iHdlStatement(o)
 
     def visit_iHdlExpr(self, o):
         """
@@ -378,8 +374,7 @@ class ToJson(HdlAstVisitor):
                 "__class__": o.__name__,
             }
         else:
-            raise NotImplementedError(
-                "Unexpected object of type " + str(type(o)))
+            raise NotImplementedError(f"Unexpected object of type {str(type(o))}")
         return d
 
     def visit_HdlValueInt(self, o):
@@ -404,9 +399,8 @@ class ToJson(HdlAstVisitor):
         :type o: HdlOp
         :return: iHdlExpr
         """
-        d = {
+        return {
             "__class__": o.__class__.__name__,
             "ops": [self.visit_iHdlExpr(op) for op in o.ops],
-            "fn": o.fn.name
+            "fn": o.fn.name,
         }
-        return d

@@ -5,10 +5,10 @@ from hdlConvertorAst.hdlAst import HdlIdDef
 def all_ids_constant(expr):
     all_ids = set()
     collect_hdl_ids(expr, all_ids)
-    for hid in all_ids:
-        if isinstance(hid.obj, HdlIdDef) and not hid.obj.is_const:
-            return False
-    return True
+    return not any(
+        isinstance(hid.obj, HdlIdDef) and not hid.obj.is_const
+        for hid in all_ids
+    )
 
 class DetectCompileTimeStatements(HdlAstVisitor):
     """

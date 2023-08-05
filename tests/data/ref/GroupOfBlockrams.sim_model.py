@@ -108,11 +108,7 @@ class Ram_dp(BasicRtlSimModel):
                 self.io.ram_memory.val_next = (self.const_0, 1, )
             elif c:
                 self.io.ram_memory.val_next = (self.io.a_din.val, (self.io.a_addr.val, ), 1, )
-            else:
-                pass
             self.io.a_dout.val_next = (self.io.ram_memory.val[self.io.a_addr.val], 1, )
-        else:
-            pass
 
     # sensitivity: HdlOpType.RISING b_clk
     def assig_process_b_dout(self):
@@ -126,11 +122,7 @@ class Ram_dp(BasicRtlSimModel):
                 self.io.ram_memory.val_next = (self.const_0, 1, )
             elif c:
                 self.io.ram_memory.val_next = (self.io.b_din.val, (self.io.b_addr.val, ), 1, )
-            else:
-                pass
             self.io.b_dout.val_next = (self.io.ram_memory.val[self.io.b_addr.val], 1, )
-        else:
-            pass
 
 #
 #    .. hwt-autodoc::
