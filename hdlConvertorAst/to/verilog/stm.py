@@ -30,14 +30,13 @@ class ToVerilog2005Stm(ToVerilog2005Expr):
         """
         :type stm: iHdlStatement
         """
-        if self.top_stm is None:
-            self.top_stm = stm
-            try:
-                return ToVerilog2005Expr.visit_iHdlStatement(self, stm)
-            finally:
-                self.top_stm = None
-        else:
+        if self.top_stm is not None:
             return ToVerilog2005Expr.visit_iHdlStatement(self, stm)
+        self.top_stm = stm
+        try:
+            return ToVerilog2005Expr.visit_iHdlStatement(self, stm)
+        finally:
+            self.top_stm = None
 
     def visit_HdlStmProcess(self, proc):
         """
@@ -103,10 +102,7 @@ class ToVerilog2005Stm(ToVerilog2005Expr):
                 assert not sens
 
         # to prevent useless newline for empty always/time waits
-        if skip_body:
-            return True
-        else:
-            return self.visit_iHdlStatement_in_statement(body)
+        return True if skip_body else self.visit_iHdlStatement_in_statement(body)
 
     def visit_iHdlStatement_in_statement(self, stm):
         """
@@ -141,8 +137,7 @@ class ToVerilog2005Stm(ToVerilog2005Expr):
         w("\n")
         with Indent(self.out):
             for s in o.body:
-                need_semi = self.visit_iHdlStatement(s)
-                if need_semi:
+                if need_semi := self.visit_iHdlStatement(s):
                     w(";\n")
                 else:
                     w("\n")
@@ -183,15 +178,14 @@ class ToVerilog2005Stm(ToVerilog2005Expr):
             w("else")
             need_semi = self.visit_iHdlStatement_in_statement(ifFalse)
 
-        if o.in_preproc:
-            if need_semi:
-                w(";\n")
-            else:
-                w("\n")
-            w("endgenerate")
-            return False
-        else:
+        if not o.in_preproc:
             return need_semi
+        if need_semi:
+            w(";\n")
+        else:
+            w("\n")
+        w("endgenerate")
+        return False
 
     def visit_HdlStmAssign(self, o):
         """
@@ -252,16 +246,14 @@ class ToVerilog2005Stm(ToVerilog2005Expr):
             for k, stms in cases:
                 self.visit_iHdlExpr(k)
                 w(":")
-                need_semi = self.visit_iHdlStatement_in_statement(stms)
-                if need_semi:
+                if need_semi := self.visit_iHdlStatement_in_statement(stms):
                     w(";\n")
                 else:
                     w("\n")
             defal = o.default
             if defal is not None:
                 w("default:")
-                need_semi = self.visit_iHdlStatement_in_statement(defal)
-                if need_semi:
+                if need_semi := self.visit_iHdlStatement_in_statement(defal):
                     w(";\n")
                 else:
                     w("\n")
@@ -293,11 +285,7 @@ class ToVerilog2005Stm(ToVerilog2005Expr):
             w("generate ")
 
         w("for (")
-        if isinstance(o.init, HdlStmBlock):
-            init_stms = o.init.body
-        else:
-            init_stms = [o.init, ]
-
+        init_stms = o.init.body if isinstance(o.init, HdlStmBlock) else [o.init, ]
         trnt = self._type_requires_nettype
         in_in_loop_spec = self.is_in_loop_spec
         try:
@@ -314,26 +302,21 @@ class ToVerilog2005Stm(ToVerilog2005Expr):
         w("; ")
         self.visit_iHdlExpr(o.cond)
         w("; ")
-        if isinstance(o.step, HdlStmBlock):
-            step_stms = o.step.body
-        else:
-            step_stms = [o.step, ]
-
+        step_stms = o.step.body if isinstance(o.step, HdlStmBlock) else [o.step, ]
         for is_last, stm in iter_with_last(step_stms):
             self.visit_iHdlStatement(stm)
             if not is_last:
                 w(", ")
         w(")")
         need_semi = self.visit_iHdlStatement_in_statement(o.body)
-        if o.in_preproc:
-            if need_semi:
-                w(";\n")
-            else:
-                w("\n")
-            w("endgenerate")
-            return False
-        else:
+        if not o.in_preproc:
             return need_semi
+        if need_semi:
+            w(";\n")
+        else:
+            w("\n")
+        w("endgenerate")
+        return False
 
     def visit_HdlStmForIn(self, o):
         """

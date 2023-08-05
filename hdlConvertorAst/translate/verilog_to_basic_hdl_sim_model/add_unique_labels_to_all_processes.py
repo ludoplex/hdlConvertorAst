@@ -19,9 +19,8 @@ class AddUniqueLabelsToAllProcesses():
         for o in m.objs:
             if isinstance(o, HdlStmProcess):
                 if not o.labels:
-                    outputs = self.stm_outputs[o]
-                    if outputs:
-                        suggested_name = "assig_process_" + outputs[0].val
+                    if outputs := self.stm_outputs[o]:
+                        suggested_name = f"assig_process_{outputs[0].val}"
                     else:
                         suggested_name = "proc"
 

@@ -13,9 +13,9 @@ class ToHwtStm(ToHwtExpr):
         w = self.out.write
         if o.labels:
             w("# ")
-            if o.labels:
-                w(o.labels[0])
-                # w(", ")
+        if o.labels:
+            w(o.labels[0])
+            # w(", ")
         # w("sens: ")
         # if o.sensitivity:
         #    for last, s in iter_with_last(o.sensitivity):

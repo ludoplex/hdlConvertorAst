@@ -75,12 +75,9 @@ class NameScope(dict):
     RE_LETTER = re.compile("[A-Za-z]")
 
     @classmethod
-    def _sanitize_name(self, suggested_name: str) -> str:
-        name = self.RE_NON_ID_CHAR.sub("_", suggested_name)
-        if not self.RE_LETTER.match(name[0]):
-            return "v" + name
-        else:
-            return name
+    def _sanitize_name(cls, suggested_name: str) -> str:
+        name = cls.RE_NON_ID_CHAR.sub("_", suggested_name)
+        return f"v{name}" if not cls.RE_LETTER.match(name[0]) else name
 
     @classmethod
     def make_top(cls, ignorecase):
@@ -130,8 +127,7 @@ class NameScope(dict):
         # [TODO] check if new name is not defined in any direction (parent-children)
         currentVal += 1
         self.cntrsForPrefixNames[prefix] = currentVal
-        usableName = prefix + str(currentVal)
-        return usableName
+        return prefix + str(currentVal)
 
     # @internal
     def register_name(self, name, obj):
@@ -139,11 +135,7 @@ class NameScope(dict):
         actual = self
         o = None
 
-        if self.ignorecase:
-            _name = name.lower()
-        else:
-            _name = name
-
+        _name = name.lower() if self.ignorecase else name
         while actual is not None:
             try:
                 o = actual[_name]

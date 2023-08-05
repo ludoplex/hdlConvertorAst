@@ -106,7 +106,7 @@ class HdlContext(object):
         from hdlConvertorAst.to.json import ToJson
         from pprint import pprint
         to = ToJson()
-        d = getattr(to, "visit_" + self.__class__.__name__)(self)
+        d = getattr(to, f"visit_{self.__class__.__name__}")(self)
         s = StringIO()
         pprint(d, stream=s, depth=3)
         return s.getvalue()

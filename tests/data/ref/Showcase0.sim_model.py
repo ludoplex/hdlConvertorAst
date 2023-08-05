@@ -337,8 +337,6 @@ class Showcase0(BasicRtlSimModel):
         elif c:
             self.io.fallingEdgeRam.val_next = (self.io.a.val[self.const_1].cast_sign(False), (self.io.r_1.val, ), 1, )
             self.io.k.val_next = (self.const_0_1._concat(self.io.fallingEdgeRam.val[self.io.r_1.val].cast_sign(True)), 1, )
-        else:
-            pass
 
     # sensitivity: a
     def assig_process_fitted(self):
@@ -367,8 +365,6 @@ class Showcase0(BasicRtlSimModel):
                     self.io.h.val_next = (self.const_1_2, 0, )
                 else:
                     self.io.h.val_next = (self.const_2_1, 0, )
-        else:
-            pass
 
     # sensitivity: HdlOpType.RISING clk
     def assig_process_j(self):
@@ -377,8 +373,6 @@ class Showcase0(BasicRtlSimModel):
             self.io.j.val_next = (self.const_0_3, 1, )
         elif c:
             self.io.j.val_next = (self.rom[self.io.r_1.val], 1, )
-        else:
-            pass
 
     # sensitivity: 
     def assig_process_out(self):
@@ -409,8 +403,6 @@ class Showcase0(BasicRtlSimModel):
                 self.io.r_1.val_next = (self.io.r_next_1.val, 1, )
                 self.io.r_0.val_next = (self.io.r_next_0.val, 1, )
                 self.io.r.val_next = (self.io.r_next.val, 1, )
-        else:
-            pass
 
     # sensitivity: i
     def assig_process_r_next(self):

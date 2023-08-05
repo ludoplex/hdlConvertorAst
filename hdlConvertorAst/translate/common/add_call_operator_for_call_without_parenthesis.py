@@ -25,13 +25,12 @@ class AddCallOperatorForCallWithoutParenthesis(HdlAstModifier):
                 self.visit_HdlOp(o)
             finally:
                 self._parentExpr = prev_par_expr
-        else:
-            if isinstance(o, HdlValueId) and\
-                    isinstance(o.obj, HdlFunctionDef) and \
-                    ( not isinstance(self._parentExpr, HdlOp) or \
-                      self._parentExpr.fn != HdlOpType.CALL or \
-                      self._parentExpr.ops[0] is not o
+        elif isinstance(o, HdlValueId) and\
+                        isinstance(o.obj, HdlFunctionDef) and \
+                        ( not isinstance(self._parentExpr, HdlOp) or \
+                          self._parentExpr.fn != HdlOpType.CALL or \
+                          self._parentExpr.ops[0] is not o
                       ):
-                # wrap function id in a call operator if parent is not a call operator
-                return hdl_call(o, [])
+            # wrap function id in a call operator if parent is not a call operator
+            return hdl_call(o, [])
         return o

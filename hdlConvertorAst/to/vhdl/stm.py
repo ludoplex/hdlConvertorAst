@@ -198,8 +198,7 @@ class ToVhdl2008Stm(ToVhdl2008Expr):
                 w("WHEN ")
                 self.visit_iHdlExpr(k)
                 w(" =>")
-                is_block = self.visit_HdlStmBlock(stms, begin_end=False)
-                if is_block:
+                if is_block := self.visit_HdlStmBlock(stms, begin_end=False):
                     w("\n")
             defal = o.default
             if defal is not None:
@@ -272,12 +271,11 @@ class ToVhdl2008Stm(ToVhdl2008Expr):
         with Indent(self.out):
             if o.in_preproc:
                 has_begin_end = self.visit_iHdlObj(o.body)
+            elif isinstance(o.body, HdlStmBlock):
+                for _stm in o.body.body:
+                    self.visit_iHdlObj(_stm)
             else:
-                if isinstance(o.body, HdlStmBlock):
-                    for _stm in o.body.body:
-                        self.visit_iHdlObj(_stm)
-                else:
-                    self.visit_iHdlObj(o.body)
+                self.visit_iHdlObj(o.body)
 
         if o.in_preproc:
             if has_begin_end:

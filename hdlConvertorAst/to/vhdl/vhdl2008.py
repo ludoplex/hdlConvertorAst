@@ -64,8 +64,7 @@ class ToVhdl2008(ToVhdl2008Stm):
         w(" ")
         w(e.name)
         w(" IS\n")
-        gs = e.params
-        if gs:
+        if gs := e.params:
             with Indent(self.out):
                 w("GENERIC(\n")
                 with Indent(self.out):
@@ -77,8 +76,7 @@ class ToVhdl2008(ToVhdl2008Stm):
                             w(";\n")
 
                 w(");\n")
-        ps = e.ports
-        if ps:
+        if ps := e.ports:
             with Indent(self.out):
                 w("PORT(\n")
                 with Indent(self.out):
@@ -89,8 +87,7 @@ class ToVhdl2008(ToVhdl2008Stm):
                         else:
                             w(";\n")
                 w(");\n")
-        di = e.objs
-        if di:
+        if di := e.objs:
             with Indent(self.out):
                 for o in di:
                     self.visit_iHdlObj(o)
@@ -134,14 +131,12 @@ class ToVhdl2008(ToVhdl2008Stm):
         if not isinstance(c.module_name, HdlValueId):
             w("ENTITY ")
         self.visit_iHdlExpr(c.module_name)
-        gms = c.param_map
-        if gms:
+        if gms := c.param_map:
             w(" GENERIC MAP(\n")
             self.visit_map(gms)
             w(")")
 
-        pms = c.port_map
-        if pms:
+        if pms := c.port_map:
             w(" PORT MAP(\n")
             self.visit_map(pms)
             w(")")

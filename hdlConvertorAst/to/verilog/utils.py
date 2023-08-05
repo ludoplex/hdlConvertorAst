@@ -18,10 +18,7 @@ def collect_array_dims(t):
     array_dim = []
     while isinstance(t, HdlOp) and t.fn == HdlOpType.INDEX:
         assert len(t.ops) <= 2
-        if len(t.ops) == 2:
-            d = t.ops[1]
-        else:
-            d = None
+        d = t.ops[1] if len(t.ops) == 2 else None
         array_dim.append(d)
         t = t.ops[0]
     array_dim.reverse()
@@ -54,9 +51,5 @@ def get_wire_t_params(t):
     t, width, is_signed = t.ops
     if width == NULL:
         width = None
-    if is_signed is None:
-        is_signed = None
-    else:
-        is_signed = bool(is_signed)
-
+    is_signed = None if is_signed is None else bool(is_signed)
     return t, width, is_signed, array_dim

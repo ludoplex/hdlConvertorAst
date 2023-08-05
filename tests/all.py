@@ -13,9 +13,7 @@ def main_test_suite():
     ]
     loader = unittest.TestLoader()
     loadedTcs = [loader.loadTestsFromTestCase(tc) for tc in tcs]
-    suite = unittest.TestSuite(loadedTcs)
-
-    return suite
+    return unittest.TestSuite(loadedTcs)
 
 
 suite = main_test_suite()

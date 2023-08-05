@@ -18,7 +18,7 @@ class BasicHdlSimModelTranslateVerilogOperands(HdlAstModifier):
         """
         o = HdlAstModifier.visit_HdlOp(self, o)
         op = o.fn
-        if op == HdlOpType.EQ or op == HdlOpType.XNOR:
+        if op in [HdlOpType.EQ, HdlOpType.XNOR]:
             # HdlOpType.EQ: '%s._eq(%s)',
             to_property_call(o, "_eq")
         elif op == HdlOpType.CONCAT:

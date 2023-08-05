@@ -30,9 +30,7 @@ class VerilogTypesToHwt(VerilogTypesToBasicHdlSimModel):
             return hdl_index(self._visit_type(o0), o1)
         elif isinstance(t, HdlTypeBitsDef):
             width = _verilog_slice_to_width(t.msb, t.lsb)
-            if width == 1:
-                return HdlValueId("BIT")
-            return BitsT(width, t.signed)
+            return HdlValueId("BIT") if width == 1 else BitsT(width, t.signed)
         elif isinstance(t, HdlValueId):
             if t == HdlValueId("integer"):
                 return HdlValueId("INT")

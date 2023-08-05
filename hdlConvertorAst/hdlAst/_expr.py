@@ -41,9 +41,7 @@ class HdlValueId(object):
         return isinstance(other, self.__class__) and self.val == other.val
 
     def __lt__(self, other):
-        if not isinstance(other, HdlValueId):
-            return False
-        return self.val < other.val
+        return False if not isinstance(other, HdlValueId) else self.val < other.val
 
     def __hash__(self):
         return hash(self.val)
@@ -52,7 +50,7 @@ class HdlValueId(object):
         return self.val
 
     def __repr__(self):
-        return "<%s %s>" % (self.__class__.__name__, self.val)
+        return f"<{self.__class__.__name__} {self.val}>"
 
 
 class HdlAll(object):
@@ -284,13 +282,10 @@ class HdlValueInt(iHdlObj):
             return (self.val == other.val
                     and self.bits == other.bits
                     and self.base == other.base)
-        else:
-            try:
-                return self.val == other
-            except Exception:
-                return False
-            except ValueError:
-                return False
+        try:
+            return self.val == other
+        except Exception:
+            return False
 
 
 class HdlExprNotImplemented(iHdlObj):
